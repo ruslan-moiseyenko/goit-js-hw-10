@@ -10,24 +10,27 @@ const countryInputRef = document.getElementById('search-box');
 const countriesListRef = document.querySelector('.country-list');
 const countriesInfoRef = document.querySelector('.country-info');
 
+
 countryInputRef.addEventListener('input', debounce(onCountryInput, DEBOUNCE_DELAY));
 
 
-async function onCountryInput(e) {
-  const value = e.target.value.trim();
-  if (!value) {
+function onCountryInput(e) {
+  if (!e.target.value.trim()) {
     clearAllCountries()
     return;
   }
-
-  try {
-    const response = await fetchCountries(value);
-    const result = await response.json();
-    renderResults(result);
-  } catch (err) {
-    console.log("an error is: ", err);
-  }
+  fetchCountries(e.target.value.trim())
+    .then(response => {
+      if (response.status === 404) {
+        throw new Error('error --- 404');
+      }
+      return response.json();
+    })
+    .then(renderResults)
+    .catch(console.log);
 }
+
+
 
 function renderResults(response) {
   if (!response.length) {
